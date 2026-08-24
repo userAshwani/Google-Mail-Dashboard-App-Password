@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>App Password Mail Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  :root { --accent: #2b7cff; --gmail-header: #fff; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body { background: #f6f8fc; overflow: hidden; }
+  .app-shell { height: 100vh; display: flex; flex-direction: column; }
+
+  /* ---- Gmail-style top bar ---- */
+  .gmail-topbar {
+    height: 64px;
+    flex: 0 0 auto;
+    background: var(--gmail-header);
+    border-bottom: 1px solid #e6e6e6;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 0 16px;
+  }
+  .icon-btn {
+    width: 40px; height: 40px;
+    border: none; background: transparent;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    cursor: pointer;
+    flex: 0 0 auto;
+  }
+  .icon-btn:hover { background: #f1f3f4; }
+  .gmail-logo { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; font-weight: 600; color: #5f6368; flex: 0 0 auto; }
+  .gmail-logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); display: inline-block; }
+  .gmail-logo span.name { display: none; }
+  @media (min-width: 576px) { .gmail-logo span.name { display: inline; } }
+
+  .gmail-search {
+    flex: 1;
+    max-width: 720px;
+    background: #eaf1fb;
+    border-radius: 24px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    height: 44px;
+    color: #5f6368;
+  }
+  .gmail-search input {
+    border: none; background: transparent; outline: none;
+    flex: 1; margin-left: 10px; font-size: 0.95rem; color: #202124;
+  }
+  .topbar-account { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
+  .topbar-account .avatar-circle {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; font-size: 0.85rem;
+  }
+  .topbar-account .email-text { font-size: 0.78rem; color: #5f6368; display: none; }
+  @media (min-width: 768px) { .topbar-account .email-text { display: inline; } }
+
+  /* ---- Body: sidebar + main ---- */
+  .app-body { flex: 1; display: flex; overflow: hidden; position: relative; }
+
+  aside.sidebar {
+    width: 256px;
+    flex: 0 0 auto;
+    background: #f6f8fc;
+    padding: 1rem 0.5rem;
+    overflow-y: auto;
+    transition: transform 0.2s ease, width 0.2s ease;
+  }
+  .compose-btn {
+    border-radius: 16px;
+    font-weight: 500;
+    box-shadow: 0 1px 3px rgba(60,64,67,0.3);
+    margin: 4px 12px 20px;
+    padding: 14px 24px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .nav-link.custom-nav {
+    border-radius: 0 20px 20px 0;
+    color: #202124;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 0 24px;
+    height: 36px;
+    margin-bottom: 2px;
+  }
+  .nav-link.custom-nav.active { background: #d3e3fd; color: #001d35; font-weight: 700; }
+  .nav-link.custom-nav:hover:not(.active) { background: #eaeaea; }
+  .nav-link.custom-nav .icon { width: 20px; text-align: center; }
+
+  /* Collapsed (icon-only) state, desktop */
+  .app-shell.sidebar-collapsed aside.sidebar { width: 76px; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav { justify-content: center; padding: 0; border-radius: 50%; width: 48px; height: 48px; margin: 0 auto 6px; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav .label { display: none; }
+  .app-shell.sidebar-collapsed .compose-btn .label { display: none; }
+  .app-shell.sidebar-collapsed .compose-btn { border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 4px auto 20px; }
+
+  main.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
+  .content-header { padding: 1rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
+  .view-body { flex: 1; overflow-y: auto; padding: 0.5rem 1.5rem 1.5rem; }
+  .view { display: none; }
+  .view.active { display: block; }
+
+  .mail-card { cursor: pointer; }
+  .mail-card .avatar {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 600; flex: 0 0 auto;
+  }
+  .mail-card.unread .avatar { background: #ff5722; }
+  .mail-card.unread .subject::before {
+    content: ""; display: inline-block; width: 8px; height: 8px;
+    border-radius: 50%; background: var(--accent); margin-right: 6px;
+  }
+  .mail-card .snippet { color: #555; font-size: 0.88rem; }
+  .detail-container iframe { width: 100%; min-height: 300px; border: none; }
+  .detail-container pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 0.88rem; }
+
+  .contact-avatar, .event-dot {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: #6c5ce7; color: #fff; display: flex;
+    align-items: center; justify-content: center; font-weight: 600;
+  }
+
+  footer.app-footer {
+    flex: 0 0 auto;
+    text-align: center;
+    font-size: 0.78rem;
+    color: #767676;
+    padding: 8px 12px;
+    border-top: 1px solid #eee;
+    background: #fff;
+  }
+  footer.app-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
+  footer.app-footer a:hover { text-decoration: underline; }
+
+  /* ---- Mobile: off-canvas sidebar ---- */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: 1030;
+  }
+  @media (max-width: 767.98px) {
+    aside.sidebar {
+      position: fixed;
+      top: 64px; bottom: 0; left: 0;
+      z-index: 1040;
+      width: 256px !important;
+      background: #fff;
+      transform: translateX(-100%);
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+    }
+    .app-shell.sidebar-open aside.sidebar { transform: translateX(0); }
+    .app-shell.sidebar-open .sidebar-backdrop { display: block; }
+    .app-shell.sidebar-collapsed aside.sidebar .nav-link.custom-nav { justify-content: flex-start; border-radius: 0 20px 20px 0; width: auto; height: 36px; margin: 0 0 2px; padding: 0 24px; }
+    .app-shell.sidebar-collapsed aside.sidebar .nav-link.custom-nav .label { display: inline; }
+    .app-shell.sidebar-collapsed aside.sidebar .compose-btn { border-radius: 16px; width: auto; height: auto; padding: 14px 24px; margin: 4px 12px 20px; }
+    .app-shell.sidebar-collapsed aside.sidebar .compose-btn .label { display: inline; }
+    .gmail-search { display: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <!-- Top bar -->
+    <div class="gmail-topbar">
+      <button class="icon-btn" id="sidebarToggle" title="Toggle menu">☰</button>
+      <div class="gmail-logo"><span class="dot"></span><span class="name">App Password Mail</span></div>
+      <div class="gmail-search d-none d-sm-flex">
+        🔍<input type="text" placeholder="Search is not enabled yet" disabled />
+      </div>
+      <div class="topbar-account">
+        <span class="email-text" id="accountLabel">Loading…</span>
+        <div class="avatar-circle" id="accountAvatar">?</div>
+      </div>
+    </div>
+
+    <div class="app-body">
+      <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+      <aside class="sidebar" id="sidebar">
+        <button class="btn btn-primary compose-btn" id="composeNavBtn"><span>✎</span><span class="label">Compose</span></button>
+        <nav class="nav flex-column">
+          <a href="#" class="nav-link custom-nav active" data-view="inbox"><span class="icon">📥</span><span class="label">Inbox</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="compose"><span class="icon">✉️</span><span class="label">Compose</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="sent"><span class="icon">📤</span><span class="label">Sent</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="contacts"><span class="icon">👤</span><span class="label">Contacts</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="calendar"><span class="icon">📅</span><span class="label">Calendar</span></a>
+        </nav>
+      </aside>
+
+      <main class="content">
+        <div class="content-header">
+          <div>
+            <h1 class="h5 mb-0" id="viewTitle">Inbox</h1>
+            <div class="text-muted small" id="status">Loading...</div>
+          </div>
+          <button class="btn btn-outline-secondary btn-sm" id="refresh">Refresh</button>
+        </div>
+
+        <div class="view-body">
+          <!-- Inbox -->
+          <div class="view active" id="view-inbox"><div id="mails"></div></div>
+
+          <!-- Sent -->
+          <div class="view" id="view-sent"><div id="sentMails"></div></div>
+
+          <!-- Compose -->
+          <div class="view" id="view-compose">
+            <form class="card p-4 shadow-sm" style="max-width: 560px;" id="composeForm">
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted" for="composeTo">To</label>
+                <input type="email" class="form-control" id="composeTo" placeholder="recipient@example.com" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted" for="composeSubject">Subject</label>
+                <input type="text" class="form-control" id="composeSubject" placeholder="Subject" required />
+              </div>
+              <div class="mb-3">
+                <label class="form-label small fw-semibold text-muted" for="composeBody">Message</label>
+                <textarea class="form-control" id="composeBody" rows="7" placeholder="Write your message..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary" id="composeSubmit">Send</button>
+              <div id="composeStatus" class="mt-2 small"></div>
+            </form>
+          </div>
+
+          <!-- Contacts -->
+          <div class="view" id="view-contacts"><div id="contactsList" class="row g-3"></div></div>
+
+          <!-- Calendar -->
+          <div class="view" id="view-calendar"><div id="eventsList" class="list-group"></div></div>
+        </div>
+      </main>
+    </div>
+
+    <footer class="app-footer">
+      Developed by <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">Ashwani Developer</a>
+    </footer>
+  </div>
+
+  <script>
+    function escapeHtml(str) {
+      const div = document.createElement("div");
+      div.textContent = str || "";
+      return div.innerHTML;
+    }
+    function initials(name) {
+      const parts = (name || "").replace(/["<>]/g, "").trim().split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return "?";
+      if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    function formatDate(iso) {
+      if (!iso) return "";
+      const d = new Date(iso);
+      const now = new Date();
+      const sameDay = d.toDateString() === now.toDateString();
+      if (sameDay) return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      return d.toLocaleDateString([], { day: "2-digit", month: "short" }) + ", " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+
+    // ---- Sidebar toggle (responsive) ----
+    const appShell = document.getElementById("appShell");
+    const sidebarToggle = document.getElementById("sidebarToggle");
+    const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+
+    function isMobile() { return window.matchMedia("(max-width: 767.98px)").matches; }
+
+    function toggleSidebar() {
+      if (isMobile()) {
+        appShell.classList.toggle("sidebar-open");
+      } else {
+        appShell.classList.toggle("sidebar-collapsed");
+      }
+    }
+    sidebarToggle.addEventListener("click", toggleSidebar);
+    sidebarBackdrop.addEventListener("click", () => appShell.classList.remove("sidebar-open"));
+
+    // Collapse sidebar by default on mobile (off-canvas, closed)
+    if (isMobile()) appShell.classList.remove("sidebar-open");
+
+    // ---- Navigation ----
+    const views = ["inbox", "compose", "sent", "contacts", "calendar"];
+    const titles = { inbox: "Inbox", compose: "Compose", sent: "Sent", contacts: "Contacts", calendar: "Calendar" };
+    const loaded = {};
+
+    function switchView(name) {
+      views.forEach(v => document.getElementById("view-" + v).classList.toggle("active", v === name));
+      document.querySelectorAll(".custom-nav").forEach(el => el.classList.toggle("active", el.dataset.view === name));
+      document.getElementById("viewTitle").textContent = titles[name];
+
+      const showsRefresh = ["inbox", "sent", "contacts", "calendar"].includes(name);
+      document.getElementById("refresh").style.display = showsRefresh ? "" : "none";
+      document.getElementById("status").style.display = showsRefresh ? "" : "none";
+
+      if (isMobile()) appShell.classList.remove("sidebar-open");
+
+      if (name === "inbox" && !loaded.inbox) loadMails();
+      if (name === "sent" && !loaded.sent) loadSent();
+      if (name === "contacts" && !loaded.contacts) loadContacts();
+      if (name === "calendar" && !loaded.calendar) loadEvents();
+    }
+
+    document.querySelectorAll(".custom-nav").forEach(el => {
+      el.addEventListener("click", (e) => { e.preventDefault(); switchView(el.dataset.view); });
+    });
+    document.getElementById("composeNavBtn").addEventListener("click", () => switchView("compose"));
+
+    document.getElementById("refresh").addEventListener("click", () => {
+      const active = document.querySelector(".custom-nav.active").dataset.view;
+      if (active === "inbox") loadMails();
+      if (active === "sent") loadSent();
+      if (active === "contacts") loadContacts();
+      if (active === "calendar") loadEvents();
+    });
+
+    // ---- Account ----
+    async function loadAccount() {
+      try {
+        const res = await fetch("/api/account");
+        const data = await res.json();
+        const email = data.email || "No account configured";
+        document.getElementById("accountLabel").textContent = email;
+        document.getElementById("accountAvatar").textContent = initials(email.split("@")[0]);
+      } catch {
+        document.getElementById("accountLabel").textContent = "Unable to load account";
+      }
+    }
+
+    function renderMailCards(containerId, mails, storeKey) {
+      const container = document.getElementById(containerId);
+      if (mails.length === 0) {
+        container.innerHTML = '<div class="text-muted text-center p-4 bg-white rounded shadow-sm">No mails found.</div>';
+        return;
+      }
+      window[storeKey] = mails;
+      container.innerHTML = mails.map((m, i) => `
+        <div class="card mb-3 shadow-sm mail-card ${m.read ? "" : "unread"}" data-index="${i}" data-store="${storeKey}">
+          <div class="card-body d-flex gap-3">
+            <div class="avatar">${initials(m.fromName)}</div>
+            <div class="flex-grow-1 min-width-0">
+              <div class="d-flex justify-content-between align-items-baseline flex-wrap">
+                <div class="fw-semibold" title="${escapeHtml(m.fromAddress)}">${escapeHtml(m.fromName)}</div>
+                <div class="text-muted small text-nowrap">${formatDate(m.date)}</div>
+              </div>
+              <div class="fw-semibold subject mb-1">${escapeHtml(m.subject)}</div>
+              <div class="snippet">${escapeHtml(m.snippet) || "<em>(no preview available)</em>"}</div>
+              ${m.attachments && m.attachments.length ? `<div class="small text-primary mt-2">📎 ${m.attachments.map(escapeHtml).join(", ")}</div>` : ""}
+              <div class="small text-primary mt-2 toggle-hint">Click to view full mail</div>
+              <div class="detail-container"></div>
+            </div>
+          </div>
+        </div>
+      `).join("");
+
+      container.querySelectorAll(".mail-card").forEach(el => el.addEventListener("click", () => toggleDetail(el)));
+    }
+
+    function toggleDetail(el) {
+      const idx = Number(el.dataset.index);
+      const mail = window[el.dataset.store][idx];
+      const holder = el.querySelector(".detail-container");
+      const hint = el.querySelector(".toggle-hint");
+
+      if (holder.dataset.open === "1") {
+        holder.innerHTML = "";
+        holder.dataset.open = "0";
+        hint.textContent = "Click to view full mail";
+        return;
+      }
+      holder.dataset.open = "1";
+      hint.textContent = "Click to collapse";
+
+      const toLine = `<div class="small text-muted mb-2">To: ${escapeHtml(mail.to)}</div>`;
+      if (mail.bodyHtml && mail.bodyHtml.trim()) {
+        holder.innerHTML = `<div class="border-top pt-2 mt-2">${toLine}</div>`;
+        const iframe = document.createElement("iframe");
+        iframe.setAttribute("sandbox", "allow-same-origin");
+        holder.querySelector(".border-top").appendChild(iframe);
+        iframe.srcdoc = mail.bodyHtml;
+      } else {
+        holder.innerHTML = `<div class="border-top pt-2 mt-2">${toLine}<pre>${escapeHtml(mail.bodyText || mail.snippet || "(no content)")}</pre></div>`;
+      }
+    }
+
+    async function loadMails() {
+      const status = document.getElementById("status");
+      status.textContent = "Loading...";
+      try {
+        const res = await fetch("/api/mails");
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.mails.length} mail(s)`;
+        renderMailCards("mails", data.mails, "__inboxMails");
+        loaded.inbox = true;
+      } catch (err) {
+        document.getElementById("mails").innerHTML = `<div class="alert alert-danger">Failed to load inbox: ${escapeHtml(err.message)}</div>`;
+        status.textContent = "";
+      }
+    }
+
+    async function loadSent() {
+      const status = document.getElementById("status");
+      status.textContent = "Loading...";
+      try {
+        const res = await fetch("/api/sent");
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.mails.length} mail(s)`;
+        renderMailCards("sentMails", data.mails, "__sentMails");
+        loaded.sent = true;
+      } catch (err) {
+        document.getElementById("sentMails").innerHTML = `<div class="alert alert-danger">Failed to load sent mail: ${escapeHtml(err.message)}</div>`;
+        status.textContent = "";
+      }
+    }
+
+    async function loadContacts() {
+      const status = document.getElementById("status");
+      status.textContent = "Loading...";
+      const container = document.getElementById("contactsList");
+      try {
+        const res = await fetch("/api/contacts");
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.contacts.length} contact(s)`;
+        if (data.contacts.length === 0) {
+          container.innerHTML = '<div class="text-muted text-center p-4 bg-white rounded shadow-sm w-100">No contacts found.</div>';
+        } else {
+          container.innerHTML = data.contacts.map(c => `
+            <div class="col-md-6 col-lg-4">
+              <div class="card shadow-sm h-100">
+                <div class="card-body d-flex gap-3 align-items-center">
+                  <div class="contact-avatar">${initials(c.name)}</div>
+                  <div class="min-width-0">
+                    <div class="fw-semibold">${escapeHtml(c.name)}</div>
+                    <div class="small text-muted">${escapeHtml(c.email || "")}</div>
+                    <div class="small text-muted">${escapeHtml(c.phone || "")}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `).join("");
+        }
+        loaded.contacts = true;
+      } catch (err) {
+        container.innerHTML = `<div class="alert alert-danger w-100">Failed to load contacts: ${escapeHtml(err.message)}</div>`;
+        status.textContent = "";
+      }
+    }
+
+    async function loadEvents() {
+      const status = document.getElementById("status");
+      status.textContent = "Loading...";
+      const container = document.getElementById("eventsList");
+      try {
+        const res = await fetch("/api/events");
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.events.length} event(s)`;
+        if (data.events.length === 0) {
+          container.innerHTML = '<div class="text-muted text-center p-4 bg-white rounded shadow-sm">No upcoming events found.</div>';
+        } else {
+          container.innerHTML = data.events.map(e => `
+            <div class="list-group-item d-flex gap-3 align-items-center py-3">
+              <div class="event-dot">📅</div>
+              <div>
+                <div class="fw-semibold">${escapeHtml(e.summary)}</div>
+                <div class="small text-muted">${escapeHtml(e.start)} — ${escapeHtml(e.end)}</div>
+              </div>
+            </div>
+          `).join("");
+        }
+        loaded.calendar = true;
+      } catch (err) {
+        container.innerHTML = `<div class="alert alert-danger">Failed to load calendar: ${escapeHtml(err.message)}</div>`;
+        status.textContent = "";
+      }
+    }
+
+    document.getElementById("composeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const submitBtn = document.getElementById("composeSubmit");
+      const statusEl = document.getElementById("composeStatus");
+      const to = document.getElementById("composeTo").value.trim();
+      const subject = document.getElementById("composeSubject").value.trim();
+      const text = document.getElementById("composeBody").value.trim();
+
+      submitBtn.disabled = true;
+      statusEl.className = "mt-2 small text-muted";
+      statusEl.textContent = "Sending...";
+
+      try {
+        const res = await fetch("/api/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ to, subject, text }),
+        });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error);
+        statusEl.className = "mt-2 small text-success";
+        statusEl.textContent = "Mail sent successfully.";
+        document.getElementById("composeForm").reset();
+      } catch (err) {
+        statusEl.className = "mt-2 small text-danger";
+        statusEl.textContent = "Failed to send: " + err.message;
+      } finally {
+        submitBtn.disabled = false;
+      }
+    });
+
+    loadAccount();
+    loadMails();
+  </script>
+</body>
+</html>

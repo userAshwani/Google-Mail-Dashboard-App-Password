@@ -1,0 +1,19 @@
+{
+  "name": "app-password-mail-dashboard",
+  "version": "1.0.0",
+  "description": "Gmail dashboard (inbox + compose) powered entirely by a Google App Password over IMAP/SMTP",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "fetch": "node index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "imapflow": "^1.0.169",
+    "mailparser": "^3.7.1",
+    "nodemailer": "^6.9.14",
+    "tsdav": "^2.3.1"
+  }
+}
