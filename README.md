@@ -7,8 +7,9 @@ project, no API keys. Generate an app password, run it, done.
 ![Node.js](https://img.shields.io/badge/Node.js-18%2B-green)
 ![Express](https://img.shields.io/badge/Express-4.x-black)
 ![License](https://img.shields.io/badge/license-MIT-blue)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 
-Built by [Ashwani Tiwari](https://ashwanitiwari.com).
+Built by [Ashwani Tiwari](https://ashwanitiwari.com). Open source — contributions welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
@@ -171,6 +172,16 @@ Each mail-protocol capability follows the same pattern:
   HTTPS when deployed — never persisted server-side. Still, only use this on a
   deployment you trust, since the server process does see the plaintext
   credentials in memory for the duration of each request.
+
+---
+
+## Contributing
+
+This project is open source and welcomes contributions — new modules (Drafts,
+labels, mark read/unread, `IDLE`-based live updates), bug fixes, or UI polish.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for setup steps, the code layout, and how
+to add a new module using the existing credential pattern. Issues and PRs both
+welcome.
 
 ---
 

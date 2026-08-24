@@ -117,11 +117,18 @@
   .nav-link.custom-nav .icon { width: 20px; text-align: center; flex: 0 0 auto; }
 
   /* Collapsed (icon-only) state, desktop */
-  .app-shell.sidebar-collapsed aside.sidebar { width: 76px; }
-  .app-shell.sidebar-collapsed .nav-link.custom-nav { justify-content: center; padding: 0; border-radius: 50%; width: 48px; height: 48px; margin: 0 auto 6px; }
+  .app-shell.sidebar-collapsed aside.sidebar { width: 76px; padding: 1rem 0.25rem; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav {
+    justify-content: center; padding: 0; border-radius: 50%;
+    width: 48px; height: 48px; margin: 0 auto 8px;
+    background: #fff; box-shadow: 0 1px 2px rgba(60,64,67,0.15);
+  }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav.active { background: #d7e3f2; box-shadow: none; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav:hover:not(.active) { background: #eaeaea; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav .icon { width: auto; font-size: 1.25rem; }
   .app-shell.sidebar-collapsed .nav-link.custom-nav .label { display: none; }
   .app-shell.sidebar-collapsed .compose-btn .label { display: none; }
-  .app-shell.sidebar-collapsed .compose-btn { border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 4px auto 20px; }
+  .app-shell.sidebar-collapsed .compose-btn { border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 4px auto 20px; font-size: 1.15rem; }
 
   main.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   .content-header { padding: 1rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
@@ -252,14 +259,14 @@
       <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
       <aside class="sidebar" id="sidebar">
-        <button class="btn btn-primary compose-btn" id="composeNavBtn"><span>✎</span><span class="label">Compose</span></button>
+        <button class="btn btn-primary compose-btn" id="composeNavBtn" title="Compose"><span>✎</span><span class="label">Compose</span></button>
         <nav class="nav flex-column">
-          <a href="#" class="nav-link custom-nav active" data-view="inbox"><span class="icon">📥</span><span class="label">Inbox</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="compose"><span class="icon">✉️</span><span class="label">Compose</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="sent"><span class="icon">📤</span><span class="label">Sent</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="contacts"><span class="icon">👤</span><span class="label">Contacts</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="profile"><span class="icon">⚙️</span><span class="label">Profile Setup</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="about"><span class="icon">ℹ️</span><span class="label">About</span></a>
+          <a href="#" class="nav-link custom-nav active" data-view="inbox" title="Inbox"><span class="icon">📥</span><span class="label">Inbox</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="compose" title="Compose"><span class="icon">✉️</span><span class="label">Compose</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="sent" title="Sent"><span class="icon">📤</span><span class="label">Sent</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="contacts" title="Contacts"><span class="icon">👤</span><span class="label">Contacts</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="profile" title="Profile Setup"><span class="icon">⚙️</span><span class="label">Profile Setup</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="about" title="About"><span class="icon">ℹ️</span><span class="label">About</span></a>
         </nav>
         <div class="sidebar-footer">
           <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">
@@ -382,6 +389,13 @@
                 deployment, where each visitor can temporarily use their own Gmail account for the session —
                 nothing typed there is stored on the server).
               </p>
+              <h3 class="h6 mt-4">Open source</h3>
+              <p class="text-muted small">
+                This project is open source and welcomes contributions — new modules (Sent search filters,
+                Drafts, labels), bug fixes, UI polish, or documentation. See
+                <a href="https://github.com/userAshwani/Google-Mail-Dashboard-App-Password" target="_blank" rel="noopener noreferrer">the GitHub repo</a>
+                and its <code>CONTRIBUTING.md</code> to get started — issues and pull requests are both welcome.
+              </p>
               <h3 class="h6 mt-4">Who made this</h3>
               <p class="text-muted small mb-0">
                 Built by <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">Ashwani Tiwari</a>.
@@ -451,6 +465,7 @@
         ? appShell.classList.contains("sidebar-open")
         : !appShell.classList.contains("sidebar-collapsed");
       sidebarToggle.textContent = isMobile() && isOpenOrExpanded ? "✕" : "☰";
+      sidebarToggle.title = isOpenOrExpanded ? "Close menu" : "Open menu";
     }
 
     function toggleSidebar() {
