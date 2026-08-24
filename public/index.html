@@ -114,21 +114,33 @@
   }
   .nav-link.custom-nav.active { background: #d7e3f2; color: var(--accent); font-weight: 700; }
   .nav-link.custom-nav:hover:not(.active) { background: #eaeaea; }
-  .nav-link.custom-nav .icon { width: 20px; text-align: center; flex: 0 0 auto; }
+  .nav-link.custom-nav .icon {
+    width: 20px; flex: 0 0 auto; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
 
   /* Collapsed (icon-only) state, desktop */
-  .app-shell.sidebar-collapsed aside.sidebar { width: 76px; padding: 1rem 0.25rem; }
+  .app-shell.sidebar-collapsed aside.sidebar { width: 76px; padding: 1rem 0.25rem; align-items: center; }
+  .app-shell.sidebar-collapsed nav.nav { width: 100%; align-items: center; }
   .app-shell.sidebar-collapsed .nav-link.custom-nav {
-    justify-content: center; padding: 0; border-radius: 50%;
+    justify-content: center; align-items: center; padding: 0; border-radius: 50%;
     width: 48px; height: 48px; margin: 0 auto 8px;
     background: #fff; box-shadow: 0 1px 2px rgba(60,64,67,0.15);
   }
   .app-shell.sidebar-collapsed .nav-link.custom-nav.active { background: #d7e3f2; box-shadow: none; }
   .app-shell.sidebar-collapsed .nav-link.custom-nav:hover:not(.active) { background: #eaeaea; }
-  .app-shell.sidebar-collapsed .nav-link.custom-nav .icon { width: auto; font-size: 1.25rem; }
+  .app-shell.sidebar-collapsed .nav-link.custom-nav .icon {
+    width: auto; font-size: 1.25rem; line-height: 1;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
   .app-shell.sidebar-collapsed .nav-link.custom-nav .label { display: none; }
   .app-shell.sidebar-collapsed .compose-btn .label { display: none; }
-  .app-shell.sidebar-collapsed .compose-btn { border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 4px auto 20px; font-size: 1.15rem; }
+  .app-shell.sidebar-collapsed .compose-btn {
+    border-radius: 50%; width: 48px; height: 48px; padding: 0; margin: 4px auto 20px;
+    font-size: 1.15rem; justify-content: center; align-items: center;
+  }
+  .app-shell.sidebar-collapsed .compose-btn span { line-height: 1; display: inline-flex; align-items: center; justify-content: center; }
+  .app-shell.sidebar-collapsed .sidebar-footer { width: 100%; }
 
   main.content { flex: 1; display: flex; flex-direction: column; overflow: hidden; min-width: 0; }
   .content-header { padding: 1rem 1.5rem 0.5rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
