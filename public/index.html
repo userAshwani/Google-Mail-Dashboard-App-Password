@@ -38,26 +38,6 @@
   .gmail-logo span.name { display: none; }
   @media (min-width: 576px) { .gmail-logo span.name { display: inline; } }
 
-  .gmail-search {
-    flex: 1;
-    max-width: 720px;
-    background: #eaf1fb;
-    border-radius: 24px;
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    height: 44px;
-    color: #5f6368;
-  }
-  .gmail-search input {
-    border: none; background: transparent; outline: none;
-    flex: 1; margin-left: 10px; font-size: 0.95rem; color: #202124;
-  }
-  .gmail-search button.clear-search {
-    border: none; background: transparent; color: #5f6368; cursor: pointer;
-    display: none; padding: 4px;
-  }
-  .gmail-search.has-query button.clear-search { display: inline-flex; }
   .topbar-account { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
   .topbar-account .avatar-circle {
     width: 34px; height: 34px; border-radius: 50%;
@@ -223,7 +203,6 @@
     .app-shell.sidebar-collapsed aside.sidebar .nav-link.custom-nav .label { display: inline; }
     .app-shell.sidebar-collapsed aside.sidebar .compose-btn { border-radius: 16px; width: auto; height: auto; padding: 14px 24px; margin: 4px 12px 20px; }
     .app-shell.sidebar-collapsed aside.sidebar .compose-btn .label { display: inline; }
-    .gmail-search { display: none; }
   }
 </style>
 </head>
@@ -239,9 +218,6 @@
       </svg>
       <button class="icon-btn" id="sidebarToggle" title="Toggle menu">☰</button>
       <div class="gmail-logo"><span class="name">App Password Mail</span></div>
-      <div class="gmail-search d-none d-sm-flex" id="topSearchWrap">
-        🔍<input type="text" placeholder="Search is not enabled yet" disabled />
-      </div>
       <div class="topbar-account">
         <span class="email-text" id="accountLabel">Loading…</span>
         <div class="avatar-circle" id="accountAvatar">?</div>
