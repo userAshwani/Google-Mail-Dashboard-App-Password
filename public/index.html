@@ -53,6 +53,11 @@
     border: none; background: transparent; outline: none;
     flex: 1; margin-left: 10px; font-size: 0.95rem; color: #202124;
   }
+  .gmail-search button.clear-search {
+    border: none; background: transparent; color: #5f6368; cursor: pointer;
+    display: none; padding: 4px;
+  }
+  .gmail-search.has-query button.clear-search { display: inline-flex; }
   .topbar-account { margin-left: auto; display: flex; align-items: center; gap: 10px; flex: 0 0 auto; }
   .topbar-account .avatar-circle {
     width: 34px; height: 34px; border-radius: 50%;
@@ -73,7 +78,20 @@
     padding: 1rem 0.5rem;
     overflow-y: auto;
     transition: transform 0.2s ease, width 0.2s ease;
+    display: flex;
+    flex-direction: column;
   }
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 12px 8px;
+    text-align: center;
+  }
+  .sidebar-footer img {
+    max-width: 110px;
+    max-height: 40px;
+    opacity: 0.85;
+  }
+  .app-shell.sidebar-collapsed .sidebar-footer img { max-width: 36px; }
   .compose-btn {
     border-radius: 16px;
     font-weight: 500;
@@ -128,6 +146,42 @@
   .detail-container iframe { width: 100%; min-height: 300px; border: none; }
   .detail-container pre { white-space: pre-wrap; word-break: break-word; font-family: inherit; font-size: 0.88rem; }
 
+  .list-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .list-search {
+    flex: 1;
+    min-width: 200px;
+    max-width: 420px;
+    display: flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid #dadce0;
+    border-radius: 20px;
+    padding: 4px 6px 4px 14px;
+  }
+  .list-search input {
+    border: none; outline: none; flex: 1; font-size: 0.85rem; background: transparent;
+  }
+  .list-search button {
+    border: none; background: var(--accent); color: #fff; border-radius: 16px;
+    font-size: 0.8rem; padding: 6px 14px; cursor: pointer;
+  }
+  .pagination-bar {
+    display: flex; align-items: center; justify-content: flex-end;
+    gap: 12px; font-size: 0.82rem; color: #5f6368;
+  }
+  .pagination-bar button {
+    border: 1px solid #dadce0; background: #fff; border-radius: 50%;
+    width: 32px; height: 32px; cursor: pointer;
+  }
+  .pagination-bar button:disabled { opacity: 0.4; cursor: default; }
+
   .contact-avatar, .event-dot {
     width: 40px; height: 40px; border-radius: 50%;
     background: #6c5ce7; color: #fff; display: flex;
@@ -177,9 +231,15 @@
   <div class="app-shell" id="appShell">
     <!-- Top bar -->
     <div class="gmail-topbar">
+      <svg width="34" height="34" viewBox="0 0 48 48" aria-hidden="true" style="flex:0 0 auto;">
+        <path fill="#4285F4" d="M45.12 24c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11C42.73 36.4 45.12 30.71 45.12 24z"/>
+        <path fill="#34A853" d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"/>
+        <path fill="#FBBC05" d="M11.69 28.18A11.96 11.96 0 0 1 11 24c0-1.45.25-2.86.69-4.18v-5.7H4.34A21.97 21.97 0 0 0 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"/>
+        <path fill="#EA4335" d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"/>
+      </svg>
       <button class="icon-btn" id="sidebarToggle" title="Toggle menu">☰</button>
-      <div class="gmail-logo"><span class="dot"></span><span class="name">App Password Mail</span></div>
-      <div class="gmail-search d-none d-sm-flex">
+      <div class="gmail-logo"><span class="name">App Password Mail</span></div>
+      <div class="gmail-search d-none d-sm-flex" id="topSearchWrap">
         🔍<input type="text" placeholder="Search is not enabled yet" disabled />
       </div>
       <div class="topbar-account">
@@ -200,6 +260,11 @@
           <a href="#" class="nav-link custom-nav" data-view="contacts"><span class="icon">👤</span><span class="label">Contacts</span></a>
           <a href="#" class="nav-link custom-nav" data-view="calendar"><span class="icon">📅</span><span class="label">Calendar</span></a>
         </nav>
+        <div class="sidebar-footer">
+          <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">
+            <img src="https://ashwanitiwari.com/logo.png" alt="Ashwani Tiwari" onerror="this.style.display='none'" />
+          </a>
+        </div>
       </aside>
 
       <main class="content">
@@ -213,10 +278,30 @@
 
         <div class="view-body">
           <!-- Inbox -->
-          <div class="view active" id="view-inbox"><div id="mails"></div></div>
+          <div class="view active" id="view-inbox">
+            <div class="list-toolbar">
+              <div class="list-search">
+                <span>🔍</span>
+                <input type="text" id="inboxSearchInput" placeholder="Search mail" />
+                <button id="inboxSearchBtn">Search</button>
+              </div>
+              <div class="pagination-bar" id="inboxPagination"></div>
+            </div>
+            <div id="mails"></div>
+          </div>
 
           <!-- Sent -->
-          <div class="view" id="view-sent"><div id="sentMails"></div></div>
+          <div class="view" id="view-sent">
+            <div class="list-toolbar">
+              <div class="list-search">
+                <span>🔍</span>
+                <input type="text" id="sentSearchInput" placeholder="Search mail" />
+                <button id="sentSearchBtn">Search</button>
+              </div>
+              <div class="pagination-bar" id="sentPagination"></div>
+            </div>
+            <div id="sentMails"></div>
+          </div>
 
           <!-- Compose -->
           <div class="view" id="view-compose">
@@ -397,37 +482,97 @@
       }
     }
 
-    async function loadMails() {
+    // ---- Paginated + searchable mail lists (Inbox / Sent) ----
+    const listState = {
+      inbox: { page: 1, pageSize: 50, query: "" },
+      sent: { page: 1, pageSize: 50, query: "" },
+    };
+
+    function renderPagination(barId, state, onPageChange) {
+      const bar = document.getElementById(barId);
+      const { page, pageSize, total } = state;
+      if (total === 0) { bar.innerHTML = ""; return; }
+
+      const start = (page - 1) * pageSize + 1;
+      const end = Math.min(page * pageSize, total);
+      const hasPrev = page > 1;
+      const hasNext = end < total;
+
+      bar.innerHTML = `
+        <span>${start}-${end} of ${total}</span>
+        <button id="${barId}-prev" ${hasPrev ? "" : "disabled"} title="Older">‹</button>
+        <button id="${barId}-next" ${hasNext ? "" : "disabled"} title="Newer">›</button>
+      `;
+      if (hasPrev) document.getElementById(`${barId}-prev`).addEventListener("click", () => onPageChange(page - 1));
+      if (hasNext) document.getElementById(`${barId}-next`).addEventListener("click", () => onPageChange(page + 1));
+    }
+
+    async function loadMailList({ endpoint, state, containerId, paginationId, storeKey, errorLabel }) {
       const status = document.getElementById("status");
       status.textContent = "Loading...";
       try {
-        const res = await fetch("/api/mails");
+        const params = new URLSearchParams({ page: state.page, pageSize: state.pageSize });
+        if (state.query) params.set("q", state.query);
+
+        const res = await fetch(`${endpoint}?${params.toString()}`);
         const data = await res.json();
         if (!data.ok) throw new Error(data.error);
-        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.mails.length} mail(s)`;
-        renderMailCards("mails", data.mails, "__inboxMails");
-        loaded.inbox = true;
+
+        state.total = data.total;
+        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.total} mail(s) total`;
+
+        renderMailCards(containerId, data.mails, storeKey);
+        renderPagination(paginationId, state, (newPage) => {
+          state.page = newPage;
+          loadMailList({ endpoint, state, containerId, paginationId, storeKey, errorLabel });
+        });
       } catch (err) {
-        document.getElementById("mails").innerHTML = `<div class="alert alert-danger">Failed to load inbox: ${escapeHtml(err.message)}</div>`;
+        document.getElementById(containerId).innerHTML = `<div class="alert alert-danger">Failed to load ${errorLabel}: ${escapeHtml(err.message)}</div>`;
         status.textContent = "";
       }
     }
 
-    async function loadSent() {
-      const status = document.getElementById("status");
-      status.textContent = "Loading...";
-      try {
-        const res = await fetch("/api/sent");
-        const data = await res.json();
-        if (!data.ok) throw new Error(data.error);
-        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.mails.length} mail(s)`;
-        renderMailCards("sentMails", data.mails, "__sentMails");
-        loaded.sent = true;
-      } catch (err) {
-        document.getElementById("sentMails").innerHTML = `<div class="alert alert-danger">Failed to load sent mail: ${escapeHtml(err.message)}</div>`;
-        status.textContent = "";
-      }
+    function loadMails() {
+      loaded.inbox = true;
+      return loadMailList({
+        endpoint: "/api/mails",
+        state: listState.inbox,
+        containerId: "mails",
+        paginationId: "inboxPagination",
+        storeKey: "__inboxMails",
+        errorLabel: "inbox",
+      });
     }
+
+    function loadSent() {
+      loaded.sent = true;
+      return loadMailList({
+        endpoint: "/api/sent",
+        state: listState.sent,
+        containerId: "sentMails",
+        paginationId: "sentPagination",
+        storeKey: "__sentMails",
+        errorLabel: "sent mail",
+      });
+    }
+
+    document.getElementById("inboxSearchBtn").addEventListener("click", () => {
+      listState.inbox.query = document.getElementById("inboxSearchInput").value.trim();
+      listState.inbox.page = 1;
+      loadMails();
+    });
+    document.getElementById("inboxSearchInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("inboxSearchBtn").click();
+    });
+
+    document.getElementById("sentSearchBtn").addEventListener("click", () => {
+      listState.sent.query = document.getElementById("sentSearchInput").value.trim();
+      listState.sent.page = 1;
+      loadSent();
+    });
+    document.getElementById("sentSearchInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") document.getElementById("sentSearchBtn").click();
+    });
 
     async function loadContacts() {
       const status = document.getElementById("status");
