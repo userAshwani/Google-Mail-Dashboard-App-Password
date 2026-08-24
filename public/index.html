@@ -6,11 +6,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <style>
-  :root { --accent: #2b7cff; --gmail-header: #fff; }
+  :root { --accent: #14468B; --gmail-header: #fff; }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
   body { background: #f6f8fc; overflow: hidden; }
   .app-shell { height: 100vh; display: flex; flex-direction: column; }
+  .btn-primary, .btn-primary:hover, .btn-primary:focus { background-color: var(--accent); border-color: var(--accent); }
+  a { color: var(--accent); }
 
   /* ---- Gmail-style top bar ---- */
   .gmail-topbar {
@@ -22,19 +24,22 @@
     align-items: center;
     gap: 16px;
     padding: 0 16px;
+    position: relative;
+    z-index: 1050;
   }
   .icon-btn {
     width: 40px; height: 40px;
     border: none; background: transparent;
     border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem;
+    font-size: 1.3rem;
     cursor: pointer;
     flex: 0 0 auto;
+    color: #5f6368;
+    line-height: 1;
   }
   .icon-btn:hover { background: #f1f3f4; }
   .gmail-logo { display: flex; align-items: center; gap: 8px; font-size: 1.3rem; font-weight: 600; color: #5f6368; flex: 0 0 auto; }
-  .gmail-logo .dot { width: 12px; height: 12px; border-radius: 50%; background: var(--accent); display: inline-block; }
   .gmail-logo span.name { display: none; }
   @media (min-width: 576px) { .gmail-logo span.name { display: inline; } }
 
@@ -63,15 +68,29 @@
   }
   .sidebar-footer {
     margin-top: auto;
-    padding: 16px 12px 8px;
+    padding: 20px 12px 10px;
     text-align: center;
+    border-top: 1px solid #e6e6e6;
   }
   .sidebar-footer img {
-    max-width: 110px;
-    max-height: 40px;
-    opacity: 0.85;
+    max-width: 64px;
+    max-height: 64px;
+    border-radius: 50%;
+    margin-bottom: 8px;
   }
-  .app-shell.sidebar-collapsed .sidebar-footer img { max-width: 36px; }
+  .sidebar-footer .dev-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .sidebar-footer .dev-tag {
+    font-size: 0.7rem;
+    color: #767676;
+  }
+  .app-shell.sidebar-collapsed .sidebar-footer .dev-name,
+  .app-shell.sidebar-collapsed .sidebar-footer .dev-tag { display: none; }
+  .app-shell.sidebar-collapsed .sidebar-footer img { max-width: 36px; max-height: 36px; margin-bottom: 0; }
+
   .compose-btn {
     border-radius: 16px;
     font-weight: 500;
@@ -93,9 +112,9 @@
     height: 36px;
     margin-bottom: 2px;
   }
-  .nav-link.custom-nav.active { background: #d3e3fd; color: #001d35; font-weight: 700; }
+  .nav-link.custom-nav.active { background: #d7e3f2; color: var(--accent); font-weight: 700; }
   .nav-link.custom-nav:hover:not(.active) { background: #eaeaea; }
-  .nav-link.custom-nav .icon { width: 20px; text-align: center; }
+  .nav-link.custom-nav .icon { width: 20px; text-align: center; flex: 0 0 auto; }
 
   /* Collapsed (icon-only) state, desktop */
   .app-shell.sidebar-collapsed aside.sidebar { width: 76px; }
@@ -162,7 +181,7 @@
   }
   .pagination-bar button:disabled { opacity: 0.4; cursor: default; }
 
-  .contact-avatar, .event-dot {
+  .contact-avatar {
     width: 40px; height: 40px; border-radius: 50%;
     background: #6c5ce7; color: #fff; display: flex;
     align-items: center; justify-content: center; font-weight: 600;
@@ -179,6 +198,8 @@
   }
   footer.app-footer a { color: var(--accent); text-decoration: none; font-weight: 600; }
   footer.app-footer a:hover { text-decoration: underline; }
+
+  .about-card, .profile-card { max-width: 640px; }
 
   /* ---- Mobile: off-canvas sidebar ---- */
   .sidebar-backdrop {
@@ -203,6 +224,9 @@
     .app-shell.sidebar-collapsed aside.sidebar .nav-link.custom-nav .label { display: inline; }
     .app-shell.sidebar-collapsed aside.sidebar .compose-btn { border-radius: 16px; width: auto; height: auto; padding: 14px 24px; margin: 4px 12px 20px; }
     .app-shell.sidebar-collapsed aside.sidebar .compose-btn .label { display: inline; }
+    .app-shell.sidebar-collapsed .sidebar-footer .dev-name,
+    .app-shell.sidebar-collapsed .sidebar-footer .dev-tag { display: block; }
+    .app-shell.sidebar-collapsed .sidebar-footer img { max-width: 64px; max-height: 64px; margin-bottom: 8px; }
   }
 </style>
 </head>
@@ -234,12 +258,15 @@
           <a href="#" class="nav-link custom-nav" data-view="compose"><span class="icon">✉️</span><span class="label">Compose</span></a>
           <a href="#" class="nav-link custom-nav" data-view="sent"><span class="icon">📤</span><span class="label">Sent</span></a>
           <a href="#" class="nav-link custom-nav" data-view="contacts"><span class="icon">👤</span><span class="label">Contacts</span></a>
-          <a href="#" class="nav-link custom-nav" data-view="calendar"><span class="icon">📅</span><span class="label">Calendar</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="profile"><span class="icon">⚙️</span><span class="label">Profile Setup</span></a>
+          <a href="#" class="nav-link custom-nav" data-view="about"><span class="icon">ℹ️</span><span class="label">About</span></a>
         </nav>
         <div class="sidebar-footer">
           <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">
             <img src="https://ashwanitiwari.com/logo.png" alt="Ashwani Tiwari" onerror="this.style.display='none'" />
           </a>
+          <div class="dev-name">Ashwani Tiwari</div>
+          <div class="dev-tag">ashwanitiwari.com</div>
         </div>
       </aside>
 
@@ -302,14 +329,71 @@
           <!-- Contacts -->
           <div class="view" id="view-contacts"><div id="contactsList" class="row g-3"></div></div>
 
-          <!-- Calendar -->
-          <div class="view" id="view-calendar"><div id="eventsList" class="list-group"></div></div>
+          <!-- Profile Setup -->
+          <div class="view" id="view-profile">
+            <div class="card p-4 shadow-sm profile-card">
+              <p class="text-muted small">
+                Use this app with your own Gmail account without touching the server's <code>.env</code>.
+                Enter your Gmail address and an
+                <a href="https://myaccount.google.com/apppasswords" target="_blank" rel="noopener noreferrer">app password</a>
+                below. This is stored only in this browser tab's session storage — it is never sent anywhere
+                except directly to this app's own API, and is cleared the moment you close the tab or click
+                "Clear". Nothing is written to a database or file on the server.
+              </p>
+              <form id="profileForm">
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-muted" for="profileEmail">Gmail address</label>
+                  <input type="email" class="form-control" id="profileEmail" placeholder="you@gmail.com" />
+                </div>
+                <div class="mb-3">
+                  <label class="form-label small fw-semibold text-muted" for="profileAppPassword">App password</label>
+                  <input type="password" class="form-control" id="profileAppPassword" placeholder="16-character app password" />
+                </div>
+                <div class="d-flex gap-2">
+                  <button type="submit" class="btn btn-primary">Save for this session</button>
+                  <button type="button" class="btn btn-outline-secondary" id="profileClearBtn">Clear</button>
+                </div>
+                <div id="profileStatus" class="mt-2 small"></div>
+              </form>
+            </div>
+          </div>
+
+          <!-- About -->
+          <div class="view" id="view-about">
+            <div class="card p-4 shadow-sm about-card">
+              <h2 class="h5">About this project</h2>
+              <p class="text-muted">
+                <strong>App Password Mail Dashboard</strong> is a self-hosted, Gmail-styled inbox that runs
+                entirely on a Google <strong>App Password</strong> — a 16-character code Google issues once
+                2-Step Verification is enabled on an account. No OAuth consent screen, no Google Cloud project,
+                no refresh tokens.
+              </p>
+              <h3 class="h6 mt-4">How it's built</h3>
+              <ul class="text-muted small">
+                <li><strong>Backend:</strong> Node.js + Express. <code>imapflow</code> reads mail (Inbox/Sent) over IMAP, <code>nodemailer</code> sends mail over SMTP, and <code>tsdav</code> reads Contacts over CardDAV — all authenticated with the same app password.</li>
+                <li><strong>Frontend:</strong> A single static page (Bootstrap 5) that talks to the backend over a small JSON API — no build step, no framework.</li>
+                <li><strong>Search:</strong> Uses Gmail's <code>X-GM-RAW</code> IMAP extension so search behaves like Gmail's own search box, not a plain-text scan.</li>
+                <li><strong>Pagination:</strong> Mail is fetched 50 at a time, the same way Gmail's own inbox pages results.</li>
+              </ul>
+              <h3 class="h6 mt-4">How it works</h3>
+              <p class="text-muted small">
+                Credentials come from one of two places: the server's own <code>.env</code> file (for a
+                private, self-hosted instance), or the <strong>Profile Setup</strong> page (for a public
+                deployment, where each visitor can temporarily use their own Gmail account for the session —
+                nothing typed there is stored on the server).
+              </p>
+              <h3 class="h6 mt-4">Who made this</h3>
+              <p class="text-muted small mb-0">
+                Built by <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">Ashwani Tiwari</a>.
+              </p>
+            </div>
+          </div>
         </div>
       </main>
     </div>
 
     <footer class="app-footer">
-      Developed by <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">Ashwani Developer</a>
+      Developed by <a href="https://ashwanitiwari.com" target="_blank" rel="noopener noreferrer">Ashwani Tiwari</a>
     </footer>
   </div>
 
@@ -334,6 +418,27 @@
       return d.toLocaleDateString([], { day: "2-digit", month: "short" }) + ", " + d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
     }
 
+    // ---- Temporary session credentials (Profile Setup) ----
+    function getSessionCredentials() {
+      try {
+        const email = sessionStorage.getItem("mailEmail");
+        const appPassword = sessionStorage.getItem("mailAppPassword");
+        if (email && appPassword) return { email, appPassword };
+      } catch {}
+      return null;
+    }
+
+    function authHeaders() {
+      const creds = getSessionCredentials();
+      if (!creds) return {};
+      return { "x-mail-username": creds.email, "x-mail-password": creds.appPassword };
+    }
+
+    function apiFetch(url, options = {}) {
+      const headers = Object.assign({}, options.headers || {}, authHeaders());
+      return fetch(url, Object.assign({}, options, { headers }));
+    }
+
     // ---- Sidebar toggle (responsive) ----
     const appShell = document.getElementById("appShell");
     const sidebarToggle = document.getElementById("sidebarToggle");
@@ -341,22 +446,34 @@
 
     function isMobile() { return window.matchMedia("(max-width: 767.98px)").matches; }
 
+    function updateToggleIcon() {
+      const isOpenOrExpanded = isMobile()
+        ? appShell.classList.contains("sidebar-open")
+        : !appShell.classList.contains("sidebar-collapsed");
+      sidebarToggle.textContent = isMobile() && isOpenOrExpanded ? "✕" : "☰";
+    }
+
     function toggleSidebar() {
       if (isMobile()) {
         appShell.classList.toggle("sidebar-open");
       } else {
         appShell.classList.toggle("sidebar-collapsed");
       }
+      updateToggleIcon();
     }
     sidebarToggle.addEventListener("click", toggleSidebar);
-    sidebarBackdrop.addEventListener("click", () => appShell.classList.remove("sidebar-open"));
+    sidebarBackdrop.addEventListener("click", () => {
+      appShell.classList.remove("sidebar-open");
+      updateToggleIcon();
+    });
 
     // Collapse sidebar by default on mobile (off-canvas, closed)
     if (isMobile()) appShell.classList.remove("sidebar-open");
+    updateToggleIcon();
 
     // ---- Navigation ----
-    const views = ["inbox", "compose", "sent", "contacts", "calendar"];
-    const titles = { inbox: "Inbox", compose: "Compose", sent: "Sent", contacts: "Contacts", calendar: "Calendar" };
+    const views = ["inbox", "compose", "sent", "contacts", "profile", "about"];
+    const titles = { inbox: "Inbox", compose: "Compose", sent: "Sent", contacts: "Contacts", profile: "Profile Setup", about: "About" };
     const loaded = {};
 
     function switchView(name) {
@@ -364,16 +481,15 @@
       document.querySelectorAll(".custom-nav").forEach(el => el.classList.toggle("active", el.dataset.view === name));
       document.getElementById("viewTitle").textContent = titles[name];
 
-      const showsRefresh = ["inbox", "sent", "contacts", "calendar"].includes(name);
+      const showsRefresh = ["inbox", "sent", "contacts"].includes(name);
       document.getElementById("refresh").style.display = showsRefresh ? "" : "none";
       document.getElementById("status").style.display = showsRefresh ? "" : "none";
 
-      if (isMobile()) appShell.classList.remove("sidebar-open");
+      if (isMobile()) { appShell.classList.remove("sidebar-open"); updateToggleIcon(); }
 
       if (name === "inbox" && !loaded.inbox) loadMails();
       if (name === "sent" && !loaded.sent) loadSent();
       if (name === "contacts" && !loaded.contacts) loadContacts();
-      if (name === "calendar" && !loaded.calendar) loadEvents();
     }
 
     document.querySelectorAll(".custom-nav").forEach(el => {
@@ -386,13 +502,12 @@
       if (active === "inbox") loadMails();
       if (active === "sent") loadSent();
       if (active === "contacts") loadContacts();
-      if (active === "calendar") loadEvents();
     });
 
     // ---- Account ----
     async function loadAccount() {
       try {
-        const res = await fetch("/api/account");
+        const res = await apiFetch("/api/account");
         const data = await res.json();
         const email = data.email || "No account configured";
         document.getElementById("accountLabel").textContent = email;
@@ -420,8 +535,8 @@
               </div>
               <div class="fw-semibold subject mb-1">${escapeHtml(m.subject)}</div>
               <div class="snippet">${escapeHtml(m.snippet) || "<em>(no preview available)</em>"}</div>
-              ${m.attachments && m.attachments.length ? `<div class="small text-primary mt-2">📎 ${m.attachments.map(escapeHtml).join(", ")}</div>` : ""}
-              <div class="small text-primary mt-2 toggle-hint">Click to view full mail</div>
+              ${m.attachments && m.attachments.length ? `<div class="small mt-2" style="color:var(--accent)">📎 ${m.attachments.map(escapeHtml).join(", ")}</div>` : ""}
+              <div class="small mt-2 toggle-hint" style="color:var(--accent)">Click to view full mail</div>
               <div class="detail-container"></div>
             </div>
           </div>
@@ -490,7 +605,7 @@
         const params = new URLSearchParams({ page: state.page, pageSize: state.pageSize });
         if (state.query) params.set("q", state.query);
 
-        const res = await fetch(`${endpoint}?${params.toString()}`);
+        const res = await apiFetch(`${endpoint}?${params.toString()}`);
         const data = await res.json();
         if (!data.ok) throw new Error(data.error);
 
@@ -555,7 +670,7 @@
       status.textContent = "Loading...";
       const container = document.getElementById("contactsList");
       try {
-        const res = await fetch("/api/contacts");
+        const res = await apiFetch("/api/contacts");
         const data = await res.json();
         if (!data.ok) throw new Error(data.error);
         status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.contacts.length} contact(s)`;
@@ -584,35 +699,6 @@
       }
     }
 
-    async function loadEvents() {
-      const status = document.getElementById("status");
-      status.textContent = "Loading...";
-      const container = document.getElementById("eventsList");
-      try {
-        const res = await fetch("/api/events");
-        const data = await res.json();
-        if (!data.ok) throw new Error(data.error);
-        status.textContent = `Last updated: ${new Date().toLocaleTimeString()} · ${data.events.length} event(s)`;
-        if (data.events.length === 0) {
-          container.innerHTML = '<div class="text-muted text-center p-4 bg-white rounded shadow-sm">No upcoming events found.</div>';
-        } else {
-          container.innerHTML = data.events.map(e => `
-            <div class="list-group-item d-flex gap-3 align-items-center py-3">
-              <div class="event-dot">📅</div>
-              <div>
-                <div class="fw-semibold">${escapeHtml(e.summary)}</div>
-                <div class="small text-muted">${escapeHtml(e.start)} — ${escapeHtml(e.end)}</div>
-              </div>
-            </div>
-          `).join("");
-        }
-        loaded.calendar = true;
-      } catch (err) {
-        container.innerHTML = `<div class="alert alert-danger">Failed to load calendar: ${escapeHtml(err.message)}</div>`;
-        status.textContent = "";
-      }
-    }
-
     document.getElementById("composeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
       const submitBtn = document.getElementById("composeSubmit");
@@ -626,7 +712,7 @@
       statusEl.textContent = "Sending...";
 
       try {
-        const res = await fetch("/api/send", {
+        const res = await apiFetch("/api/send", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ to, subject, text }),
@@ -642,6 +728,59 @@
       } finally {
         submitBtn.disabled = false;
       }
+    });
+
+    // ---- Profile Setup ----
+    function refreshProfileFormFromSession() {
+      const creds = getSessionCredentials();
+      if (creds) {
+        document.getElementById("profileEmail").value = creds.email;
+        document.getElementById("profileAppPassword").value = creds.appPassword;
+      }
+    }
+    refreshProfileFormFromSession();
+
+    document.getElementById("profileForm").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const email = document.getElementById("profileEmail").value.trim();
+      const appPassword = document.getElementById("profileAppPassword").value.trim();
+      const statusEl = document.getElementById("profileStatus");
+
+      if (!email || !appPassword) {
+        statusEl.className = "mt-2 small text-danger";
+        statusEl.textContent = "Enter both your Gmail address and app password.";
+        return;
+      }
+
+      try {
+        sessionStorage.setItem("mailEmail", email);
+        sessionStorage.setItem("mailAppPassword", appPassword);
+      } catch {}
+
+      statusEl.className = "mt-2 small text-success";
+      statusEl.textContent = "Saved for this browser session. Reloading Inbox...";
+
+      loaded.inbox = false;
+      loaded.sent = false;
+      loaded.contacts = false;
+      loadAccount();
+      loadMails();
+    });
+
+    document.getElementById("profileClearBtn").addEventListener("click", () => {
+      try {
+        sessionStorage.removeItem("mailEmail");
+        sessionStorage.removeItem("mailAppPassword");
+      } catch {}
+      document.getElementById("profileForm").reset();
+      document.getElementById("profileStatus").className = "mt-2 small text-muted";
+      document.getElementById("profileStatus").textContent = "Cleared. Now using the server's default account (if configured).";
+
+      loaded.inbox = false;
+      loaded.sent = false;
+      loaded.contacts = false;
+      loadAccount();
+      loadMails();
     });
 
     loadAccount();

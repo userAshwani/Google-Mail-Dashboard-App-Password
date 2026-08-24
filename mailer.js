@@ -24,21 +24,19 @@ function sanitizeHtml(html) {
     .replace(/\son\w+='[^']*'/gi, "");
 }
 
-function getClient() {
-  const { MAIL_USERNAME, MAIL_PASSWORD, IMAP_HOST, IMAP_PORT } = process.env;
+function getClient(credentials) {
+  const username = credentials?.username || process.env.MAIL_USERNAME;
+  const password = credentials?.password || process.env.MAIL_PASSWORD;
 
-  if (!MAIL_USERNAME || !MAIL_PASSWORD) {
-    throw new Error("Missing MAIL_USERNAME or MAIL_PASSWORD in .env");
+  if (!username || !password) {
+    throw new Error("Missing mail username or app password");
   }
 
   return new ImapFlow({
-    host: IMAP_HOST || "imap.gmail.com",
-    port: Number(IMAP_PORT) || 993,
+    host: "imap.gmail.com",
+    port: 993,
     secure: true,
-    auth: {
-      user: MAIL_USERNAME,
-      pass: MAIL_PASSWORD,
-    },
+    auth: { user: username, pass: password },
     logger: false,
   });
 }
@@ -65,8 +63,8 @@ async function parseMessage(message) {
  * Fetches one page of mail from a folder, newest first — mirrors Gmail's
  * "1-50 of N" pagination. Optionally filters by a search query (IMAP TEXT search).
  */
-async function fetchMailPage(folder, { page = 1, pageSize = 50, query = "" } = {}) {
-  const client = getClient();
+async function fetchMailPage(folder, { page = 1, pageSize = 50, query = "", credentials } = {}) {
+  const client = getClient(credentials);
   await client.connect();
 
   const lock = await client.getMailboxLock(folder);

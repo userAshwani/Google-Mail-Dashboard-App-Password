@@ -1,15 +1,16 @@
 const { DAVClient } = require("tsdav");
 
-async function fetchContacts(limit = 30) {
-  const { MAIL_USERNAME, MAIL_PASSWORD } = process.env;
+async function fetchContacts(limit = 30, credentials) {
+  const username = credentials?.username || process.env.MAIL_USERNAME;
+  const password = credentials?.password || process.env.MAIL_PASSWORD;
 
-  if (!MAIL_USERNAME || !MAIL_PASSWORD) {
-    throw new Error("Missing MAIL_USERNAME or MAIL_PASSWORD in .env");
+  if (!username || !password) {
+    throw new Error("Missing mail username or app password");
   }
 
   const client = new DAVClient({
-    serverUrl: "https://www.googleapis.com/carddav/v1/principals/" + encodeURIComponent(MAIL_USERNAME) + "/lists/default/",
-    credentials: { username: MAIL_USERNAME, password: MAIL_PASSWORD },
+    serverUrl: "https://www.googleapis.com/carddav/v1/principals/" + encodeURIComponent(username) + "/lists/default/",
+    credentials: { username, password },
     authMethod: "Basic",
     defaultAccountType: "carddav",
   });
